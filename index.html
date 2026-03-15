@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#fafaf8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tools">
+<link rel="manifest" href="manifest.json">
+<title>Tools</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',-apple-system,system-ui,sans-serif;background:#fafaf8;color:#1a1a1a;min-height:100vh;padding-bottom:72px}
+.app{max-width:720px;margin:0 auto;padding:24px 16px 16px}
+h1{font-size:22px;font-weight:700;letter-spacing:-0.02em}
+.sub{color:#666;font-size:14px;margin-top:4px}
+.tabs{display:flex;border-bottom:1.5px solid #e0e0e0;margin:20px 0 24px;overflow-x:auto}
+.tab{padding:10px 16px;font-size:13px;font-weight:400;color:#888;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;margin-bottom:-1.5px}
+.tab.active{font-weight:600;color:#1a1a1a;border-bottom-color:#1a1a1a}
+.card{background:#fff;border-radius:12px;border:1px solid #e8e8e4;padding:14px 16px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.card.selected{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.card.selected .dim{color:#aaa}
+.card.selected .dimmer{color:#888}
+.dim{color:#888;font-size:12px;margin-top:2px}
+.dimmer{color:#aaa;font-size:11px}
+.section-label{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.check-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #f0f0ec}
+.check-row:last-child{border-bottom:none}
+.check-row label{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;flex:1}
+.check-row input[type=checkbox]{width:18px;height:18px;accent-color:#1a1a1a}
+.checked-text{text-decoration:line-through;color:#aaa}
+.list-box{background:#fff;border-radius:10px;border:1px solid #e8e8e4;overflow:hidden;margin-bottom:16px}
+.pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:500}
+.pill-funs{color:#3a6fb5;background:#e8f0fa}
+.pill-char{color:#8a5a8a;background:#f3eaf3}
+.pill-samen{color:#555;background:#f0f0ec}
+.trash-banner{background:#faf8f0;border:1px solid #e8e4d8;border-radius:10px;padding:12px 16px;margin-bottom:16px}
+.task-card{background:#fff;border-radius:12px;border:1px solid #e8e8e4;padding:20px;cursor:pointer;margin-bottom:10px;position:relative;overflow:hidden;transition:all .2s}
+.task-card.done{opacity:.5}
+.task-card.done::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;opacity:.4}
+.daily-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8f8f6;border-radius:8px;cursor:pointer;border:1px solid #eeece8;opacity:.75;margin-bottom:12px}
+.daily-row.done{opacity:.45}
+.week-row{display:flex;gap:14px;padding:14px 16px;border-radius:10px;background:#fff;border:1px solid #e8e8e4;margin-bottom:6px;align-items:flex-start}
+.week-row.today{background:#1a1a1a;border:none;color:#fff}
+.week-row.past{opacity:.45}
+.week-day{min-width:40px;text-align:center;flex-shrink:0}
+.empty-state{background:#f0f0ec;border-radius:12px;padding:28px 20px;text-align:center}
+.btn-back{background:none;border:none;cursor:pointer;font-size:13px;color:#888;padding:0;margin-bottom:20px}
+.recipe-box{background:#fff;border-radius:12px;border:1px solid #e8e8e4;overflow:hidden;margin-bottom:16px}
+.recipe-header{padding:20px 20px 16px}
+.recipe-section{padding:16px 20px;border-top:1px solid #f0f0ec}
+.step{display:flex;gap:12px;margin-bottom:12px;font-size:14px;line-height:1.6}
+.step-num{min-width:28px;height:28px;border-radius:14px;background:#f0f0ec;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#888;flex-shrink:0;margin-top:1px}
+.tip{background:#f0f6ff;padding:10px 14px;border-radius:8px;font-size:13px;color:#4a7fbf;flex:1}
+.info-box{background:#fff;border-radius:10px;border:1px solid #e8e8e4;padding:20px;margin-bottom:16px;font-size:14px;line-height:1.7;color:#333}
+.info-box h3{font-size:16px;font-weight:700;margin-bottom:12px;color:#1a1a1a}
+.info-alt{background:#f0f0ec;border-radius:10px;padding:20px;font-size:14px;line-height:1.7;color:#333}
+.summary-box{background:#f0f0ec;border-radius:10px;padding:16px;margin-bottom:24px}
+.opt-btn{padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:none}
+.opt-btn.active{background:#1a1a1a;color:#fff}
+.opt-btn:not(.active){background:#f0f0ec;color:#555}
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e8e8e4;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;padding:10px 0 8px;text-align:center;cursor:pointer;border:none;background:none;font-size:11px;color:#aaa;font-weight:500}
+.nav-btn.active{color:#1a1a1a}
+.nav-btn .nav-icon{font-size:20px;display:block;margin-bottom:2px}
+/* Onboarding */
+.onboard{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:40px 20px}
+.onboard h1{font-size:28px;margin-bottom:8px}
+.onboard p{color:#888;margin-bottom:32px}
+.person-btn{width:200px;padding:16px;border-radius:12px;border:2px solid #e8e8e4;background:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:12px;transition:all .15s}
+.person-btn:hover{border-color:#1a1a1a}
+.expanded-panel{padding:12px 14px;border-radius:0 0 10px 10px;font-size:13px;border:1px solid #e8e8e4;border-top:none}
+.expand-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:4px 8px}
+.afval-row{display:flex;gap:14px;padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #e8e8e4;margin-bottom:4px;align-items:center}
+.afval-row.today{background:#1a1a1a;border:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="data.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+
+// ============================================================
+// FIREBASE
+// ============================================================
+firebase.initializeApp({
+  apiKey: "AIzaSyD7T7v8WHwilnfJEVf9xN3AT1uka5tYwgE",
+  authDomain: "tools-cenf.firebaseapp.com",
+  projectId: "tools-cenf",
+  storageBucket: "tools-cenf.firebasestorage.app",
+  messagingSenderId: "68724685771",
+  appId: "1:68724685771:web:e885b733f2d7157fbad44e"
+});
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// ============================================================
+// STATE
+// ============================================================
+let S = {
+  person: localStorage.getItem('person') || null,
+  mainView: 'eten', // 'eten' or 'huis'
+  // Eten
+  etenTab: 'plan',
+  selectedMealIds: [],
+  expandedMeal: null,
+  selectedRecipe: null,
+  checkedStaples: {},
+  checkedSnacks: {},
+  checkedBackup: {},
+  checkedBreakfast: {},
+  ontbijtOption: 'beide',
+  // Huishouden
+  huisTab: 'vandaag',
+  doneTasks: {},
+  dailyDone: {},
+};
+
+let firebaseReady = false;
+let writeTimeout = null;
+
+function syncToFirebase() {
+  if (!firebaseReady) return;
+  clearTimeout(writeTimeout);
+  writeTimeout = setTimeout(() => {
+    const shared = {
+      selectedMealIds: S.selectedMealIds,
+      checkedStaples: S.checkedStaples,
+      checkedSnacks: S.checkedSnacks,
+      checkedBackup: S.checkedBackup,
+      checkedBreakfast: S.checkedBreakfast,
+      ontbijtOption: S.ontbijtOption,
+      doneTasks: S.doneTasks,
+      dailyDone: S.dailyDone,
+      lastUpdate: Date.now()
+    };
+    db.collection('shared').doc('state').set(shared, {merge: true}).catch(e => console.log('sync err', e));
+  }, 300);
+}
+
+function initFirebase() {
+  auth.signInAnonymously().then(() => {
+    firebaseReady = true;
+    db.collection('shared').doc('state').onSnapshot(doc => {
+      if (!doc.exists) return;
+      const d = doc.data();
+      let changed = false;
+      ['selectedMealIds','checkedStaples','checkedSnacks','checkedBackup','checkedBreakfast','ontbijtOption','doneTasks','dailyDone'].forEach(k => {
+        if (d[k] !== undefined && JSON.stringify(S[k]) !== JSON.stringify(d[k])) {
+          S[k] = d[k];
+          changed = true;
+        }
+      });
+      if (changed) render();
+    });
+  }).catch(e => console.log('auth err', e));
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getISOWeek(d) {
+  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dn = dt.getUTCDay() || 7;
+  dt.setUTCDate(dt.getUTCDate() + 4 - dn);
+  const ys = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1));
+  return Math.ceil((((dt - ys) / 864e5) + 1) / 7);
+}
+function getMondayOfWeek(d) {
+  const r = new Date(d); const dy = r.getDay();
+  r.setDate(r.getDate() - dy + (dy === 0 ? -6 : 1));
+  r.setHours(0,0,0,0); return r;
+}
+function sameDay(a,b){ return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
+function fmtDate(d){ const days=["zondag","maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag"]; const mo=["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"]; return days[d.getDay()]+' '+d.getDate()+' '+mo[d.getMonth()]; }
+function fmtShort(d){ const days=["zo","ma","di","wo","do","vr","za"]; return {dn:days[d.getDay()],num:d.getDate()}; }
+function dateKey(d){ return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function getTrashForDate(d) {
+  const dow = d.getDay(), items = [];
+  const dn = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  for (const [k,c] of Object.entries(TRASH_CONFIG)) {
+    if (dow !== c.day) continue;
+    if (c.everyWeek) { items.push(c); continue; }
+    const ref = new Date(c.refDate.getFullYear(), c.refDate.getMonth(), c.refDate.getDate());
+    const diffW = Math.round((dn - ref) / 6048e5);
+    if (diffW >= 0 && diffW % c.intervalWeeks === 0) items.push(c);
+  }
+  return items;
+}
+
+function getHuisTasksForDate(d) {
+  const dow = d.getDay(), week = getISOWeek(d), even = week % 2 === 0, tasks = [];
+  if (dow === 1) tasks.push({...TASKS.was, taskId:'was', person:'Charmaine'});
+  if (dow === 3) tasks.push({...TASKS.opvouwen, taskId:'opvouwen', person:'Charmaine'});
+  if (dow === 5) tasks.push({...TASKS.badkamer, taskId:'badkamer', person:'Charmaine'});
+  if (dow === 6) {
+    if (even) { tasks.push({...TASKS.stofzuiger,taskId:'stofzuiger',person:'Funs'}); tasks.push({...TASKS.dweil,taskId:'dweil',person:'Funs'}); }
+    else tasks.push({...TASKS.bed,taskId:'bed',person:'Samen'});
+  }
+  if (dow === 0 && d.getDate() <= 7) tasks.push({...TASKS.ramen,taskId:'ramen',person:'Samen'});
+  return tasks;
+}
+
+function personPill(p) {
+  if (p==='Funs') return '<span class="pill pill-funs">Funs</span>';
+  if (p==='Charmaine') return '<span class="pill pill-char">Charmaine</span>';
+  return '<span class="pill pill-samen">Samen</span>';
+}
+
+function selectedMeals() { return S.selectedMealIds.map(id => meals.find(m => m.id === id)).filter(Boolean); }
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  const app = document.getElementById('app');
+  if (!S.person) { app.innerHTML = renderOnboarding(); attachEvents(); return; }
+  app.innerHTML = `
+    <div class="app">
+      ${S.mainView === 'eten' ? renderEten() : renderHuis()}
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-btn ${S.mainView==='eten'?'active':''}" data-nav="eten"><span class="nav-icon">🍽️</span>Eten</button>
+      <button class="nav-btn ${S.mainView==='huis'?'active':''}" data-nav="huis"><span class="nav-icon">🏠</span>Huishouden</button>
+    </div>`;
+  attachEvents();
+}
+
+function renderOnboarding() {
+  return `<div class="onboard">
+    <h1>Tools</h1>
+    <p>Wie ben jij?</p>
+    <button class="person-btn" data-person="Funs">Funs</button>
+    <button class="person-btn" data-person="Charmaine">Charmaine</button>
+  </div>`;
+}
+
+// ============================================================
+// ETEN
+// ============================================================
+function renderEten() {
+  const tabs = [{k:'plan',l:'Maaltijden'},{k:'list',l:'Boodschappen'},{k:'recipes',l:'Recepten'},{k:'system',l:'Systeem'}];
+  return `
+    <h1>Weekplanner</h1>
+    <p class="sub">Kies 5 maaltijden. Vink af wat je nodig hebt. Klaar.</p>
+    <div class="tabs">${tabs.map(t=>`<button class="tab ${S.etenTab===t.k?'active':''}" data-etab="${t.k}">${t.l}</button>`).join('')}</div>
+    ${S.etenTab==='plan'?renderEtenPlan():''}
+    ${S.etenTab==='list'?renderEtenList():''}
+    ${S.etenTab==='recipes'?renderEtenRecipes():''}
+    ${S.etenTab==='system'?renderEtenSystem():''}`;
+}
+
+function renderEtenPlan() {
+  const sel = selectedMeals();
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <span class="dim">${sel.length}/5 gekozen</span>
+    ${sel.filter(m=>m.freezable).length?`<span class="dimmer">❄️ ${sel.filter(m=>m.freezable).length} invriesbaar</span>`:''}
+  </div>`;
+  if (sel.length) {
+    html += `<div class="summary-box"><div class="section-label">Deze week</div>`;
+    sel.forEach((m,i) => {
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;${i<sel.length-1?'border-bottom:1px solid #e0ddd8':''}"><span style="font-size:14px">${m.freezable?'❄️ ':''}${esc(m.name)}</span><span class="dim">${m.time}</span></div>`;
+    });
+    html += `<div style="margin-top:10px;padding-top:8px;border-top:1px solid #d0cdc8;font-size:12px;color:#888">+ 2 vrije avonden (restjes, vriezer, bestellen, tosti)</div></div>`;
+  }
+  mealCategories.forEach(cat => {
+    const cm = meals.filter(m=>m.category===cat);
+    if (!cm.length) return;
+    html += `<div style="margin-bottom:24px"><div class="section-label">${cat}</div>`;
+    cm.forEach(m => {
+      const isSel = S.selectedMealIds.includes(m.id);
+      const isExp = S.expandedMeal === m.id;
+      html += `<div style="margin-bottom:6px"><div class="card ${isSel?'selected':''}" style="border-radius:${isExp?'10px 10px 0 0':'10px'};display:flex;align-items:center;justify-content:space-between">
+        <div data-toggle-meal="${m.id}" style="flex:1;cursor:pointer">
+          <div style="font-size:14px;font-weight:500">${m.freezable?'❄️ ':''}${esc(m.name)}</div>
+          <div class="${isSel?'dim':'dim'}" style="${isSel?'color:#aaa':''}">${m.time} · ${m.cost} p.p.</div>
+        </div>
+        <button class="expand-btn" data-expand="${m.id}" style="color:${isSel?'#aaa':'#888'}">${isExp?'▲':'▼'}</button>
+      </div>`;
+      if (isExp) {
+        html += `<div class="expanded-panel" style="background:${isSel?'#2a2a2a':'#f8f8f6'};color:${isSel?'#ccc':'#555'};${isSel?'border:none':''}">
+          <div style="margin-bottom:6px"><strong style="color:${isSel?'#fff':'#1a1a1a'}">Nodig:</strong> ${esc(m.ingredients.join(', '))}</div>
+          <div style="margin-bottom:6px"><strong style="color:${isSel?'#fff':'#1a1a1a'}">Balans:</strong> ${esc(m.balance)}</div>
+          ${m.freezable?`<div style="margin-bottom:6px;font-size:12px;color:${isSel?'#8cb4ff':'#4a7fbf'}">❄️ Dubbele portie kan in de vriezer</div>`:''}
+          <button data-recipe="${m.id}" style="background:${isSel?'#444':'#e8e8e4'};border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;color:${isSel?'#fff':'#1a1a1a'};margin-top:4px">Bekijk recept →</button>
+        </div>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  return html;
+}
+
+function renderEtenList() {
+  const sel = selectedMeals();
+  if (!sel.length) return `<div class="empty-state"><p style="color:#888">Kies eerst maaltijden in het eerste tabblad.</p></div>`;
+  let html = '';
+  // Ontbijt
+  html += `<div style="margin-bottom:24px"><div class="section-label">Ontbijt & lunch</div>
+    <div style="background:#fff;border-radius:10px;border:1px solid #e8e8e4;padding:16px;margin-bottom:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        ${['brood','yoghurt','beide'].map(o=>`<button class="opt-btn ${S.ontbijtOption===o?'active':''}" data-ontbijt="${o}">${o==='brood'?'Brood':o==='yoghurt'?'Yoghurt/kwark':'Allebei'}</button>`).join('')}
+      </div>
+      <div style="font-size:12px;color:#888">Lunch = brood met beleg of restjes.</div>
+    </div>
+    <div class="list-box">
+      ${breakfastItems.filter(i => S.ontbijtOption!=='brood' || !['Yoghurt of kwark (500g)','Muesli/granola'].includes(i.name)).map(i => checkRow('breakfast',i.name,`€${i.price.toFixed(2)}`)).join('')}
+    </div></div>`;
+  // Voorraadkast
+  html += `<div style="margin-bottom:24px"><div class="section-label">Voorraadkast check</div>
+    <div style="font-size:12px;color:#aaa;margin-bottom:12px">Heb je het nog? Niet aanvinken. Op? Aanvinken.</div>
+    <div class="list-box">${staplesData.filter(s=>s.category==='voorraadkast').map(s=>checkRow('staples',s.name,s.note,true)).join('')}</div></div>`;
+  // Vers
+  html += `<div style="margin-bottom:24px"><div class="section-label">Vers & diepvries</div>
+    <div class="list-box">${staplesData.filter(s=>s.category==='vers'||s.category==='diepvries').map(s=>checkRow('staples',s.name,`€${s.price.toFixed(2)}`)).join('')}</div></div>`;
+  // Snacks
+  html += `<div style="margin-bottom:24px"><div class="section-label">Tussendoortjes</div>
+    <div style="font-size:12px;color:#aaa;margin-bottom:12px">Beter dit in huis dan een trip naar het tankstation.</div>
+    <div class="list-box">${snacks.map(s=>checkRow('snacks',s.name,`€${s.price.toFixed(2)}`)).join('')}</div></div>`;
+  // Noodvoorraad
+  html += `<div style="margin-bottom:24px"><div class="section-label">Noodvoorraad vriezer</div>
+    <div style="font-size:12px;color:#aaa;margin-bottom:12px">Voor de dagen dat echt niks lukt.</div>
+    <div class="list-box">${backupMeals.map(s=>checkRow('backup',s.name,`€${s.price.toFixed(2)}`)).join('')}</div></div>`;
+  // Extra per maaltijd
+  html += `<div style="margin-bottom:24px"><div class="section-label">Extra voor deze week</div>`;
+  sel.forEach(m => {
+    const sw = staplesData.map(s=>s.name.toLowerCase().split(' ')[0]);
+    const extras = m.ingredients.filter(i => !sw.some(w=>i.toLowerCase().includes(w)));
+    if (!extras.length) return;
+    html += `<div style="background:#fff;border-radius:10px;border:1px solid #e8e8e4;padding:14px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px">${esc(m.name)}</div>
+      <div style="font-size:13px;color:#555">${esc(extras.join(', '))}</div></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function checkRow(type, name, right, isNote) {
+  const map = {staples:'checkedStaples',snacks:'checkedSnacks',backup:'checkedBackup',breakfast:'checkedBreakfast'};
+  const checked = (S[map[type]] || {})[name] || false;
+  return `<div class="check-row"><label>
+    <input type="checkbox" ${checked?'checked':''} data-check="${type}" data-name="${esc(name)}">
+    <span class="${checked?'checked-text':''}">${esc(name)}</span>
+  </label><span style="color:${isNote?'#aaa':'#888'};font-size:${isNote?'11px':'13px'}">${right||''}</span></div>`;
+}
+
+function renderEtenRecipes() {
+  const sel = selectedMeals();
+  if (S.selectedRecipe) {
+    const m = meals.find(r => r.id === S.selectedRecipe);
+    if (!m) return '';
+    return `<button class="btn-back" data-back-recipe>← Terug naar overzicht</button>
+      <div class="recipe-box">
+        <div class="recipe-header"><h2 style="font-size:20px;font-weight:700">${esc(m.name)}</h2>
+          <div style="display:flex;gap:12px;margin-top:8px;font-size:13px;color:#888;flex-wrap:wrap">
+            <span>${m.time}</span><span>${m.cost} p.p.</span><span>${m.category}</span>
+            ${m.freezable?'<span style="color:#4a7fbf">❄️ Invriesbaar</span>':''}
+          </div>
+        </div>
+        <div class="recipe-section"><div class="section-label" style="margin-bottom:6px">Voedingsbalans</div>
+          <div style="font-size:13px;color:#555;line-height:1.5">${esc(m.balance)}</div></div>
+        <div class="recipe-section"><div class="section-label" style="margin-bottom:10px">Ingrediënten (2 personen)</div>
+          ${m.ingredients.map(i=>`<div style="font-size:14px;padding:4px 0;color:#333">${esc(i)}</div>`).join('')}</div>
+        <div class="recipe-section" style="padding-bottom:24px"><div class="section-label" style="margin-bottom:12px">Stappen</div>
+          ${m.steps.map((s,i) => s.startsWith('💡') ?
+            `<div class="step"><div class="tip">${esc(s)}</div></div>` :
+            `<div class="step"><div class="step-num">${i+1}</div><div>${esc(s)}</div></div>`
+          ).join('')}
+        </div>
+      </div>`;
+  }
+  let html = `<div style="font-size:13px;color:#888;margin-bottom:20px">Tik op een recept voor de volledige uitleg.</div>`;
+  if (sel.length) {
+    html += `<div style="margin-bottom:28px"><div class="section-label" style="margin-bottom:10px">Gekozen deze week</div>`;
+    sel.forEach(m => {
+      html += `<div class="card selected" data-recipe="${m.id}" style="display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-size:14px;font-weight:500">${m.freezable?'❄️ ':''}${esc(m.name)}</div><div class="dim" style="color:#888">${m.time} · ${m.cost} p.p.</div></div><span style="color:#555">→</span></div>`;
+    });
+    html += `</div>`;
+  }
+  html += `<div class="section-label" style="margin-bottom:10px">Alle recepten</div>`;
+  meals.forEach(m => {
+    html += `<div class="card" data-recipe="${m.id}" style="display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:14px;font-weight:500">${m.freezable?'❄️ ':''}${esc(m.name)}</div><div class="dim">${m.time} · ${m.cost} p.p. · ${m.category}</div></div><span style="color:#ccc">→</span></div>`;
+  });
+  return html;
+}
+
+function renderEtenSystem() {
+  return `
+    <div class="info-box"><h3>Het systeem in 5 regels</h3>
+      <div style="margin-bottom:12px"><strong>Zondag:</strong> Kies 5 maaltijden. Loop de checklist door. Plaats de bestelling bij Picnic of AH. 15 minuten totaal.</div>
+      <div style="margin-bottom:12px"><strong>De voorraadkast</strong> check je — niet automatisch bestellen. Op? Aanvinken. Heb je het nog? Doorlopen.</div>
+      <div style="margin-bottom:12px"><strong>Ontbijt en lunch</strong> zijn standaard. Brood met beleg, eventueel yoghurt met muesli. Niet nadenken.</div>
+      <div style="margin-bottom:12px"><strong>2 avonden zijn vrij.</strong> Restjes, vriezervoorraad, bestellen, tosti. Bewust ingebouwd.</div>
+      <div><strong>Als het misgaat:</strong> Geen schuldgevoel. Volgende zondag opnieuw.</div>
+    </div>
+    <div class="info-box"><h3>❄️ De vriezerstrategie</h3>
+      <div style="margin-bottom:12px">Recepten met een ❄️ zijn invriesbaar. Als je een dubbele portie maakt en de helft invries, bouw je langzaam een voorraad op.</div>
+      <div><strong>Invriesbare recepten:</strong> bolognese saus, nasi, bami, curry, tomatensoep, ovenschotel. Altijd zonder garnering invriezen.</div>
+    </div>
+    <div class="info-alt"><h3>Budget</h3>
+      <div style="margin-bottom:8px"><strong>€60-85 per week</strong> voor twee personen inclusief alles.</div>
+      <div>Goedkoper dan wat jullie nu kwijt zijn: geen impulsaankopen, minder Thuisbezorgd, minder verspilling.</div>
+    </div>`;
+}
+
+// ============================================================
+// HUISHOUDEN
+// ============================================================
+function renderHuis() {
+  const tabs = [{k:'vandaag',l:'Vandaag'},{k:'week',l:'Week'},{k:'afval',l:'Afval'},{k:'info',l:'Info'}];
+  return `
+    <h1>Huishouden</h1>
+    <p class="sub">Eén taak. Gedaan of niet. Morgen is een nieuwe dag.</p>
+    <div class="tabs">${tabs.map(t=>`<button class="tab ${S.huisTab===t.k?'active':''}" data-htab="${t.k}">${t.l}</button>`).join('')}</div>
+    ${S.huisTab==='vandaag'?renderHuisVandaag():''}
+    ${S.huisTab==='week'?renderHuisWeek():''}
+    ${S.huisTab==='afval'?renderHuisAfval():''}
+    ${S.huisTab==='info'?renderHuisInfo():''}`;
+}
+
+function renderHuisVandaag() {
+  const today = new Date();
+  const dk = dateKey(today);
+  const tasks = getHuisTasksForDate(today);
+  const trash = getTrashForDate(today);
+  const dDone = (S.dailyDone||{})[dk] || false;
+  const allDone = tasks.length ? tasks.every(t=>((S.doneTasks||{})[dk]||{})[t.taskId]) && dDone : dDone;
+
+  let html = `<div style="font-size:14px;color:#888;margin-bottom:20px;text-transform:capitalize">${fmtDate(today)}</div>`;
+  // Trash
+  if (trash.length) {
+    html += `<div class="trash-banner"><div style="font-size:11px;font-weight:600;color:#b0a080;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">🗑 Afval — zet het de avond ervoor buiten</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${trash.map(t=>`<span style="font-size:13px;font-weight:500;color:${t.color};background:${t.color}15;border-radius:6px;padding:3px 10px">${t.label}</span>`).join('')}</div></div>`;
+  }
+  // Daily
+  html += `<div class="daily-row ${dDone?'done':''}" data-daily="${dk}">
+    <span style="font-size:16px">${DAILY_TASK.icon}</span>
+    <span style="font-size:13px;color:#888;${dDone?'text-decoration:line-through':''}; flex:1">${DAILY_TASK.name}</span>
+    <span class="pill pill-funs">Funs</span>
+    ${dDone?'<span style="font-size:14px;color:#bbb">✓</span>':''}
+  </div>`;
+  // Tasks
+  if (tasks.length) {
+    tasks.forEach(t => {
+      const done = ((S.doneTasks||{})[dk]||{})[t.taskId] || false;
+      html += `<div class="task-card ${done?'done':''}" data-task="${t.taskId}" data-dk="${dk}">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="font-size:28px;line-height:1;margin-top:2px">${t.icon}</div>
+          <div style="flex:1"><div style="font-size:17px;font-weight:600;${done?'text-decoration:line-through':''}">${t.name}</div>
+            <div style="font-size:13px;color:#888;margin-top:3px">${t.desc}</div>
+            <div style="display:flex;gap:10px;margin-top:8px"><span class="pill" style="color:#888;background:#f0f0ec">~${t.duration} min</span>${personPill(t.person)}</div>
+          </div>
+        </div>
+      </div>`;
+    });
+  } else {
+    html += `<div class="empty-state"><div style="font-size:28px;margin-bottom:8px">🛋️</div><div style="font-size:15px;font-weight:600;color:#555">Geen extra taak vandaag</div><div style="font-size:13px;color:#999;margin-top:4px">Alleen keuken. Verder niks.</div></div>`;
+  }
+  if (allDone) html += `<div style="margin-top:16px;padding:12px 16px;background:#f0f6ec;border-radius:10px;font-size:13px;color:#5a7a4a;text-align:center">Alles gedaan. Klaar voor vandaag.</div>`;
+  // Tomorrow
+  const tmrw = new Date(today); tmrw.setDate(tmrw.getDate()+1);
+  const tTasks = getHuisTasksForDate(tmrw), tTrash = getTrashForDate(tmrw);
+  html += `<div style="margin-top:28px"><div style="font-size:11px;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Morgen</div>
+    <div style="background:#f8f8f6;border-radius:10px;padding:12px 16px;border:1px solid #eeece8">`;
+  if (tTrash.length) html += `<div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">${tTrash.map(t=>`<span style="font-size:11px;color:${t.color};font-weight:500">🗑 ${t.label}</span>`).join('')}</div>`;
+  if (tTasks.length) tTasks.forEach(t => { html += `<div style="font-size:13px;color:#999;padding:2px 0">${t.icon} ${t.name} <span style="font-size:11px;margin-left:8px;color:${t.person==='Funs'?'#7aa0cc':t.person==='Charmaine'?'#b08ab0':'#bbb'}">${t.person}</span></div>`; });
+  else html += `<div style="font-size:13px;color:#bbb">🍳 Alleen keuken</div>`;
+  html += `</div></div>`;
+  return html;
+}
+
+function renderHuisWeek() {
+  const today = new Date();
+  const mon = getMondayOfWeek(today);
+  const dates = Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(d.getDate()+i);return d;});
+  let html = `<div style="font-size:14px;color:#888;margin-bottom:16px">Week ${getISOWeek(today)}</div>`;
+  dates.forEach(d => {
+    const isT = sameDay(d,today), isP = d<today&&!isT;
+    const tasks = getHuisTasksForDate(d), trash = getTrashForDate(d);
+    const {dn,num} = fmtShort(d);
+    html += `<div class="week-row ${isT?'today':''} ${isP?'past':''}">
+      <div class="week-day"><div style="font-size:11px;font-weight:600;color:${isT?'#888':'#aaa'};text-transform:uppercase">${dn}</div><div style="font-size:18px;font-weight:700;color:${isT?'#fff':'#1a1a1a'};margin-top:1px">${num}</div></div>
+      <div style="flex:1;min-width:0">`;
+    if (trash.length) html += `<div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap">${trash.map(t=>`<span style="font-size:11px;font-weight:500;color:${t.color};opacity:${isT?.85:.7}">🗑 ${t.label}</span>`).join('')}</div>`;
+    html += `<div style="font-size:12px;color:${isT?'#666':'#ccc'};padding:1px 0;margin-bottom:${tasks.length?'2px':'0'}">🍳 Keuken <span style="font-size:10px;margin-left:6px;color:${isT?'#7ab0e0':'#a0c0e0'}">Funs</span></div>`;
+    tasks.forEach(t => {
+      const pc = isT?(t.person==='Funs'?'#7ab0e0':t.person==='Charmaine'?'#c8a0c8':'#888'):(t.person==='Funs'?'#3a6fb5':t.person==='Charmaine'?'#8a5a8a':'#888');
+      html += `<div style="font-size:14px;color:${isT?'#fff':'#1a1a1a'};padding:2px 0;display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${t.icon} ${t.name}</span><span style="font-size:11px;font-weight:500;color:${pc}">${t.person}</span></div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `<div style="margin-top:20px;padding:12px 16px;background:#f8f8f6;border-radius:8px;display:flex;gap:16px;font-size:12px;color:#aaa;flex-wrap:wrap">
+    <span><span style="color:#3a6fb5;font-weight:600">●</span> Funs</span><span><span style="color:#8a5a8a;font-weight:600">●</span> Charmaine</span><span><span style="color:#555;font-weight:600">●</span> Samen</span></div>`;
+  return html;
+}
+
+function renderHuisAfval() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const mo = ["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+  let html = `<div style="font-size:13px;color:#888;margin-bottom:20px">Komende 6 weken — automatisch berekend.</div>`;
+  for (let i=0;i<42;i++) {
+    const d = new Date(today); d.setDate(d.getDate()+i);
+    const trash = getTrashForDate(d);
+    if (!trash.length) continue;
+    const isT = i===0;
+    const {dn,num} = fmtShort(d);
+    html += `<div class="afval-row ${isT?'today':''}">
+      <div style="min-width:60px;font-size:13px;font-weight:500;color:${isT?'#aaa':'#888'}">${dn} ${num} ${mo[d.getMonth()]}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1">${trash.map(t=>`<span style="font-size:12px;font-weight:500;color:${isT?'#fff':t.color};background:${isT?t.color+'40':t.color+'15'};border-radius:5px;padding:2px 8px">${t.label}</span>`).join('')}</div>
+    </div>`;
+  }
+  html += `<div style="margin-top:20px;padding:14px 16px;background:#faf8f0;border-radius:8px;border:1px solid #e8e4d8;font-size:12px;color:#999;line-height:1.6"><strong style="color:#b0a080">Tip:</strong> Zet afval de avond ervoor buiten. De data kloppen automatisch — ook volgend jaar.</div>`;
+  return html;
+}
+
+function renderHuisInfo() {
+  return `
+    <div class="info-box"><h3>Hoe het werkt</h3>
+      <div style="margin-bottom:12px"><strong>Elke dag staat er maximaal één taak.</strong> Doordeweeks één ding. Weekend soms twee. Keuken is er altijd bij (Funs).</div>
+      <div style="margin-bottom:12px"><strong>Niet gedaan? Geen probleem.</strong> Er is geen achterstand. De taak komt vanzelf weer langs.</div>
+      <div style="margin-bottom:12px"><strong>De robotstofzuiger doet het meeste.</strong> Handmatig is maar 1x per 2 weken.</div>
+      <div><strong>Afvinken is optioneel.</strong> Het systeem draait gewoon door.</div>
+    </div>
+    <div class="info-box"><h3>Verdeling</h3>
+      <div style="font-size:13px;color:#555;line-height:1.8">
+        <div style="margin-bottom:12px"><span style="color:#3a6fb5;font-weight:600">Funs</span> <span style="color:#aaa">(~40u werk/week)</span></div>
+        <div style="padding-left:12px;margin-bottom:12px">Keuken opruimen — dagelijks<br>Stofzuigen + dweilen — 1x per 2 weken (zaterdag)</div>
+        <div style="margin-bottom:12px"><span style="color:#8a5a8a;font-weight:600">Charmaine</span> <span style="color:#aaa">(~20u werk/week)</span></div>
+        <div style="padding-left:12px;margin-bottom:12px">Was draaien — maandag<br>Was opvouwen — woensdag<br>Badkamer & wc — vrijdag</div>
+        <div style="margin-bottom:8px"><span style="color:#555;font-weight:600">Samen</span></div>
+        <div style="padding-left:12px">Bed verschonen — 1x per 2 weken (zaterdag)<br>Ramen — 1x per maand</div>
+      </div>
+    </div>
+    <div class="info-box"><h3>🗑 Afval</h3>
+      <div style="font-size:13px;color:#555;line-height:1.8">
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:4px;background:#2ea043;margin-right:8px"></span><strong>Keukenafval:</strong> elke dinsdag</div>
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:4px;background:#d44030;margin-right:8px"></span><strong>PMD:</strong> om de week op vrijdag</div>
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:4px;background:#38a0d4;margin-right:8px"></span><strong>Papier:</strong> om de week op woensdag</div>
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:4px;background:#777;margin-right:8px"></span><strong>Restafval:</strong> 1x per 4 weken op woensdag</div>
+      </div>
+    </div>
+    <div class="info-alt"><h3>De filosofie</h3>
+      <div style="margin-bottom:12px">Dit systeem werkt als de robotstofzuiger. Het denkt voor je. Jij opent de app, ziet wat er vandaag is, en doet het — of niet.</div>
+      <div>Eén week skippen? Het systeem draait gewoon door. Geen reset nodig.</div>
+    </div>`;
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+function attachEvents() {
+  document.getElementById('app').onclick = function(e) {
+    const t = e.target;
+    // Person select
+    const pb = t.closest('[data-person]');
+    if (pb) { S.person = pb.dataset.person; localStorage.setItem('person', S.person); render(); syncToFirebase(); return; }
+    // Bottom nav
+    const nb = t.closest('[data-nav]');
+    if (nb) { S.mainView = nb.dataset.nav; render(); return; }
+    // Eten tabs
+    const et = t.closest('[data-etab]');
+    if (et) { S.etenTab = et.dataset.etab; S.selectedRecipe = null; render(); return; }
+    // Huis tabs
+    const ht = t.closest('[data-htab]');
+    if (ht) { S.huisTab = ht.dataset.htab; render(); return; }
+    // Toggle meal
+    const tm = t.closest('[data-toggle-meal]');
+    if (tm) {
+      const id = +tm.dataset.toggleMeal;
+      if (S.selectedMealIds.includes(id)) S.selectedMealIds = S.selectedMealIds.filter(x=>x!==id);
+      else if (S.selectedMealIds.length < 5) S.selectedMealIds.push(id);
+      render(); syncToFirebase(); return;
+    }
+    // Expand meal
+    const ex = t.closest('[data-expand]');
+    if (ex) { const id = +ex.dataset.expand; S.expandedMeal = S.expandedMeal===id?null:id; render(); return; }
+    // Recipe
+    const rc = t.closest('[data-recipe]');
+    if (rc) { S.selectedRecipe = +rc.dataset.recipe; S.etenTab = 'recipes'; render(); return; }
+    // Back from recipe
+    if (t.closest('[data-back-recipe]')) { S.selectedRecipe = null; render(); return; }
+    // Ontbijt option
+    const ob = t.closest('[data-ontbijt]');
+    if (ob) { S.ontbijtOption = ob.dataset.ontbijt; render(); syncToFirebase(); return; }
+    // Checkbox
+    const cb = t.closest('input[data-check]');
+    if (cb) {
+      const map = {staples:'checkedStaples',snacks:'checkedSnacks',backup:'checkedBackup',breakfast:'checkedBreakfast'};
+      const key = map[cb.dataset.check];
+      if (!S[key]) S[key] = {};
+      S[key][cb.dataset.name] = cb.checked;
+      syncToFirebase();
+      // Don't full re-render for checkboxes — just toggle class
+      const span = cb.nextElementSibling;
+      if (span) span.className = cb.checked ? 'checked-text' : '';
+      return;
+    }
+    // Daily task
+    const dl = t.closest('[data-daily]');
+    if (dl) { const dk = dl.dataset.daily; if(!S.dailyDone)S.dailyDone={}; S.dailyDone[dk]=!S.dailyDone[dk]; render(); syncToFirebase(); return; }
+    // Huis task
+    const tk = t.closest('[data-task]');
+    if (tk) {
+      const {task:tid, dk} = tk.dataset;
+      if(!S.doneTasks)S.doneTasks={};
+      if(!S.doneTasks[dk])S.doneTasks[dk]={};
+      S.doneTasks[dk][tid] = !S.doneTasks[dk][tid];
+      render(); syncToFirebase(); return;
+    }
+  };
+}
+
+// ============================================================
+// INIT
+// ============================================================
+render();
+initFirebase();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+</script>
+</body>
+</html>
