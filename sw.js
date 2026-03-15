@@ -16,7 +16,6 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network first for Firebase, cache first for app shell
   if (e.request.url.includes('firebasejs') || e.request.url.includes('firestore') || e.request.url.includes('googleapis')) {
     e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
   } else {
