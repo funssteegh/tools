@@ -1,4 +1,4 @@
-const CACHE = 'tools-v1';
+const CACHE = 'tools-v2';
 const ASSETS = ['./index.html'];
 
 self.addEventListener('install', e => {
